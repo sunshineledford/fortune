@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Celestial Fortune Portal</title>
+  <meta name="description" content="Scan to receive your celestial fortune.">
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: radial-gradient(1200px 600px at 70% -10%, rgba(255,255,255,0.08), transparent 60%),
+                  radial-gradient(800px 400px at 10% 110%, rgba(255,255,255,0.06), transparent 60%),
+                  #0b0f1a;
+      color: #f7f7ff;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+    }
+    .card {
+      width: min(720px, 94vw);
+      background: rgba(15, 19, 34, 0.7);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 28px 24px 24px;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+      position: relative;
+      overflow: hidden;
+    }
+    .glow {
+      position: absolute;
+      inset: -20%;
+      background: radial-gradient(circle at 70% 30%, rgba(155,135,255,0.25), transparent 45%),
+                  radial-gradient(circle at 20% 80%, rgba(135,205,255,0.22), transparent 40%);
+      filter: blur(20px);
+      z-index: 0;
+    }
+    h1 {
+      font-size: clamp(24px, 4.2vw, 36px);
+      margin: 0 0 6px;
+      letter-spacing: 0.02em;
+    }
+    .sub {
+      opacity: 0.8;
+      margin-bottom: 18px;
+    }
+    .fortune {
+      position: relative;
+      z-index: 1;
+      font-size: clamp(20px, 3.8vw, 28px);
+      line-height: 1.25;
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      margin: 12px auto 18px;
+      user-select: text;
+    }
+    .btns {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 10px;
+      position: relative;
+      z-index: 1;
+    }
+    button {
+      cursor: pointer;
+      font-weight: 600;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 10px;
+      transition: transform .08s ease, background .2s ease, border-color .2s ease;
+    }
+    button:hover {
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,0.28);
+      background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
+    }
+    .hint {
+      font-size: 12px;
+      opacity: 0.7;
+      margin-top: 10px;
+    }
+    .sparkle { filter: drop-shadow(0 0 6px rgba(180,150,255,.55)); }
+    @media (prefers-color-scheme: light) {
+      body { color: #0a0a0f; }
+      .card { background: rgba(255,255,255,0.75); }
+      .fortune { background: rgba(10,10,15,0.06); color: #0a0a0f;}
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="glow" aria-hidden="true"></div>
+    <h1 class="sparkle">🌙 Celestial Fortune Portal</h1>
+    <div class="sub">Breathe in… place your hand over the screen… when you’re ready, tap “Reveal.”</div>
+    <div id="fortune" class="fortune">✨ Your fortune awaits…</div>
+    <div class="btns">
+      <button id="reveal">Reveal</button>
+      <button id="another" style="display:none">New Fortune</button>
+      <button id="copy" style="display:none">Copy Fortune</button>
+    </div>
+    <div class="hint">Every visit reveals a random fortune.</div>
+  </div>
+<script>
+  const fortunes = [
+    "✨ A spark in your soul is ready to ignite — follow it fearlessly.",
+    "🌙 The moon whispers that a secret wish will soon come true.",
+    "💫 A chance encounter tonight will leave stardust on your heart.",
+    "🔮 The universe is shifting in your favor — be ready to say yes.",
+    "🌌 Someone from your past is thinking of you under the same stars.",
+    "☀️ Your light is magnetic — you’ll draw something (or someone) wonderful your way.",
+    "🌠 The cosmos hums your name — destiny is stirring.",
+    "🌕 You are aligned with abundance — open your palms and receive.",
+    "⭐ A new path glows before you, lit by courage and curiosity.",
+    "🪐 The stars predict laughter, mischief, and one unforgettable night.",
+    "🌒 The moon guards your dreams — listen closely for her message.",
+    "✨ You’ll soon cross paths with a kindred spirit — the connection will feel ancient.",
+    "💫 You are glowing from within — don’t hide your magic tonight.",
+    "☁️ Something unexpected will arrive wrapped in coincidence.",
+    "🌞 A radiant moment will remind you that joy is your birthright.",
+    "🌙 Trust your intuition — it already knows what the stars are trying to tell you.",
+    "🌟 A wish you made long ago is finding its way back to you.",
+    "🌌 The night holds a gift meant only for you — watch for subtle signs.",
+    "🔥 The stars say: you are the miracle you’ve been waiting for.",
+    "💎 Your energy attracts light — everything you touch tonight will shimmer."
+  ];
+  const fortuneEl = document.getElementById('fortune');
+  const revealBtn = document.getElementById('reveal');
+  const anotherBtn = document.getElementById('another');
+  const copyBtn = document.getElementById('copy');
+
+  function randomFortune() {
+    const i = Math.floor(Math.random() * fortunes.length);
+    return fortunes[i];
+  }
+  function showFortune() {
+    const f = randomFortune();
+    fortuneEl.textContent = f;
+    anotherBtn.style.display = 'inline-block';
+    copyBtn.style.display = 'inline-block';
+  }
+  revealBtn.addEventListener('click', showFortune);
+  anotherBtn.addEventListener('click', showFortune);
+  copyBtn.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(fortuneEl.textContent); copyBtn.textContent = "Copied!"; setTimeout(()=>copyBtn.textContent="Copy Fortune",1200);} 
+    catch(e){ copyBtn.textContent = "Select & Copy"; setTimeout(()=>copyBtn.textContent="Copy Fortune",1400); }
+  });
+
+  // Auto-reveal a random fortune on load so every scan gets one immediately
+  window.addEventListener('load', () => {
+    showFortune();
+  });
+</script>
+</body>
+</html>
